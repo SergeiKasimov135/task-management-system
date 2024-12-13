@@ -1,0 +1,28 @@
+version: '3.8'
+services:
+  db:
+    image: postgres:16
+    container_name: task-registry-db
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./src/main/resources/db/migration:/docker-entrypoint-initdb.d
+    environment:
+      - POSTGRES_DB=registry
+      - POSTGRES_USER=registry
+      - POSTGRES_PASSWORD=registry
+    restart: always
+
+  app:
+    build: .
+    container_name: task-registry-app
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/registry
+      - SPRING_DATASOURCE_USERNAME=registry
+      - SPRING_DATASOURCE_PASSWORD=registry
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+    restart: always
